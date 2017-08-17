@@ -1,6 +1,6 @@
 $(window).ready(function() {
-    if($("#locust_count").length > 0) {
-        $("#locust_count").focus().select();
+    if($("#host").length > 0) {
+        $("#host").focus().select();
     }
 });
 
