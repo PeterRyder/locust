@@ -8,6 +8,7 @@ from itertools import chain
 from collections import defaultdict
 from six.moves import StringIO, xrange
 import six
+import jinja2
 
 from gevent import wsgi
 from flask import Flask, make_response, request, render_template
@@ -55,11 +56,19 @@ def index():
 @app.route('/swarm', methods=["POST"])
 def swarm():
     assert request.method == "POST"
-
+    logger.info(request)
+    logger.info(request.form)
     host = request.form["host"]
+
+    seg_length = int(request.form["seg_length"])
+    hit_ratio = int(request.form["hit_ratio"])
+    bitrate = request.form["bitrate"]
     locust_count = int(request.form["locust_count"])
     hatch_rate = float(request.form["hatch_rate"])
-    runners.locust_runner.start_hatching(host, locust_count, hatch_rate)
+
+    print("Seg length: " + str(seg_length))
+
+    runners.locust_runner.start_hatching(hit_ratio, bitrate, seg_length, host, locust_count, hatch_rate)
     response = make_response(json.dumps({'success':True, 'message': 'Swarming started'}))
     response.headers["Content-type"] = "application/json"
     return response
@@ -75,7 +84,7 @@ def stop():
 def reset_stats():
     runners.locust_runner.stats.reset_all()
     return "ok"
-    
+
 @app.route("/stats/requests/csv")
 def request_stats_csv():
     rows = [

@@ -53,6 +53,11 @@ var exceptions_tpl = $('#exceptions-template');
 
 $('#swarm_form').submit(function(event) {
     event.preventDefault();
+
+    var seg_length = $('#seg_length').val();
+    var bitrate = $('#bitrate').val();
+    var hit_ratio = $('#hit_ratio').val();
+
     $.post($(this).attr("action"), $(this).serialize(),
         function(response) {
             if (response.success) {

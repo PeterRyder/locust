@@ -146,16 +146,23 @@ class LocustRunner(object):
             self.locusts.killone(g)
         events.hatch_complete.fire(user_count=self.num_clients)
 
-    def start_hatching(self, host=None, locust_count=None, hatch_rate=None, wait=False):
+    def start_hatching(self, hit_ratio=None, bitrate=None, seg_length=None, host=None, locust_count=None, hatch_rate=None, wait=False):
         if self.state != STATE_RUNNING and self.state != STATE_HATCHING:
             self.stats.clear_all()
             self.stats.start_time = time()
             self.exceptions = {}
             events.locust_start_hatching.fire()
 
-        logger.info("Host: " + host)
         if host is not None:
             self.host = host
+
+        # TODO: Dont hardcode the 0th class here
+        self.locust_classes[0].min_wait = seg_length * 1000
+        self.locust_classes[0].max_wait = seg_length * 1000
+        self.locust_classes[0].task_set.bitrate = bitrate
+        self.locust_classes[0].task_set.seg_length = str(seg_length)
+        self.locust_classes[0].task_set.hit = hit_ratio
+        self.locust_classes[0].task_set.miss = 100 - hit_ratio
 
         # Dynamically changing the locust count
         if self.state != STATE_INIT and self.state != STATE_STOPPED:
@@ -205,8 +212,8 @@ class LocalLocustRunner(LocustRunner):
             self.log_exception("local", str(exception), formatted_tb)
         events.locust_error += on_locust_error
 
-    def start_hatching(self, host=None, locust_count=None, hatch_rate=None, wait=False):
-        self.hatching_greenlet = gevent.spawn(lambda: super(LocalLocustRunner, self).start_hatching(host, locust_count, hatch_rate, wait=wait))
+    def start_hatching(self, hit_ratio=None, bitrate=None, seg_length=None, host=None, locust_count=None, hatch_rate=None, wait=False):
+        self.hatching_greenlet = gevent.spawn(lambda: super(LocalLocustRunner, self).start_hatching(hit_ratio, bitrate, seg_length, host, locust_count, hatch_rate, wait=wait))
         self.greenlet = self.hatching_greenlet
 
 class DistributedLocustRunner(LocustRunner):
@@ -270,7 +277,7 @@ class MasterLocustRunner(DistributedLocustRunner):
     def user_count(self):
         return sum([c.user_count for c in six.itervalues(self.clients)])
     
-    def start_hatching(self, host, locust_count, hatch_rate):
+    def start_hatching(self, hit_ratio, bitrate, seg_length, host, locust_count, hatch_rate):
         num_slaves = len(self.clients.ready) + len(self.clients.running)
         if not num_slaves:
             logger.warning("You are running in distributed mode but have no slave servers connected. "
@@ -299,6 +306,9 @@ class MasterLocustRunner(DistributedLocustRunner):
                 "num_clients":slave_num_clients,
                 "num_requests": self.num_requests,
                 "host":self.host,
+                "hit_ratio":hit_ratio,
+                "bitrate":bitrate,
+                "seg_length":seg_length,
                 "stop_timeout":None
             }
 
@@ -400,7 +410,7 @@ class SlaveLocustRunner(DistributedLocustRunner):
                 #self.num_clients = job["num_clients"]
                 self.num_requests = job["num_requests"]
                 self.host = job["host"]
-                self.hatching_greenlet = gevent.spawn(lambda: self.start_hatching(host=self.host, locust_count=job["num_clients"], hatch_rate=job["hatch_rate"]))
+                self.hatching_greenlet = gevent.spawn(lambda: self.start_hatching(hit_ratio=job["hit_ratio"], bitrate=job["bitrate"], seg_length=job["seg_length"], host=self.host, locust_count=job["num_clients"], hatch_rate=job["hatch_rate"]))
             elif msg.type == "stop":
                 self.stop()
                 self.client.send(Message("client_stopped", None, self.client_id))

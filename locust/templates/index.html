@@ -57,12 +57,56 @@
             <div class="padder">
                 <h2>Start new Locust swarm</h2>
                 <form action="/swarm" method="POST" id="swarm_form">
-                    <label for="host">Host URL</label>
-                    <input type="text" name="host" id="host" class="val" /><br>
-                    <label for="locust_count">Number of users to simulate</label>
-                    <input type="text" name="locust_count" id="locust_count" class="val" /><br>
-                    <label for="hatch_rate">Hatch rate <span style="color:#8a8a8a;">(users spawned/second)</span></label>
-                    <input type="text" name="hatch_rate" id="hatch_rate" class="val" /><br>
+                    <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100%">
+                                <label for="host">Host URL</label>
+                            </td>
+                            <td width="100%">
+                                <input type="text" name="host" id="host" class="val" /><br>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label for="seg_length">Segment Length <span style="color:#8a8a8a;">(seconds)</span></label>
+                            </td>
+                            <td width="20%">
+                                <input type="text" name="seg_length" id="seg_length" class="val" /><br>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label for="bitrate">Bitrate<span style="color:#8a8a8a;">(1 - 5 Megabits)</span></label>
+                            </td>
+                            <td width="20%">
+                                <input type="text" name="bitrate" id="bitrate" class="val" /><br>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%">
+                                <label for="hit_ratio">Hit Ratio <span style="color:#8a8a8a;">(%)</span></label>
+                            </td>
+                            <td width="20%">
+                                <input type="text" name="hit_ratio" id="hit_ratio" class="val" /><br>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="60%">
+                                <label for="locust_count">Number of users to simulate</label>
+                            </td>
+                            <td width="60%">
+                                <input type="text" name="locust_count" id="locust_count" class="val" /><br>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="60%">
+                                <label for="hatch_rate">Hatch rate<span style="color:#8a8a8a;">(users spawned/second)</span></label>
+                            </td>
+                            <td width="60%">
+                                <input type="text" name="hatch_rate" id="hatch_rate" class="val" /><br>
+                            </td>
+                        </tr>
+                    </table>
                     <button type="submit">Start swarming</button>
                 </form>
                 <div style="clear:right;"></div>
